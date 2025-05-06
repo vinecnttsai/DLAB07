@@ -23,7 +23,6 @@ module top_module (
     reg debounced_up_d, debounced_down_d;
     wire up_posedge, down_posedge; 
 
-// 將debounced_up, debounced_down打一拍
 always @(posedge sys_clk or negedge sys_rst_n) begin
     if (!sys_rst_n) begin
         debounced_up_d <= 0;
