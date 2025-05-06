@@ -1,13 +1,9 @@
-module sound_keypad (
+
+module top_module (
     input sys_clk,
     input sys_rst_n,
-    input E,
-    input F,
-    input G,
-    output A,
-    output B,
-    output C,
-    output D,
+    input up,
+    input down,
     output CA,
     output CB,
     output CC,
@@ -16,34 +12,50 @@ module sound_keypad (
     output CF,
     output CG,
     output DP,
-    output [7:0] AN,
-    output tone_clk
+    output [7:0] AN
 );
-    wire [3:0] key_pad;    
 
-    keypad k1 (
-        .sys_clk(sys_clk),
+    parameter N = 100; // 5 for Simulation
+    (* mark_debug = "true", dont_touch = "true" *)wire clk;
+    (* mark_debug = "true", dont_touch = "true" *)wire debounced_up;
+    (* mark_debug = "true", dont_touch = "true" *)wire debounced_down;
+    (* mark_debug = "true", dont_touch = "true" *)reg [3:0] cnt; 
+    reg debounced_up_d, debounced_down_d;
+    wire up_posedge, down_posedge; 
+
+// 將debounced_up, debounced_down打一拍
+always @(posedge sys_clk or negedge sys_rst_n) begin
+    if (!sys_rst_n) begin
+        debounced_up_d <= 0;
+        debounced_down_d <= 0;
+    end else begin
+        debounced_up_d <= debounced_up;
+        debounced_down_d <= debounced_down;
+    end
+end
+
+assign up_posedge = debounced_up & ~debounced_up_d;
+assign down_posedge = debounced_down & ~debounced_down_d;
+
+always @(posedge sys_clk or negedge sys_rst_n) begin
+    if (!sys_rst_n) begin
+        cnt <= 0;
+    end else if (up_posedge) begin
+        cnt <= cnt + 1;
+    end else if (down_posedge) begin
+        cnt <= (cnt == 0) ? 15 : cnt - 1;
+    end
+end
+
+
+    fq_div #(10000) clk_div ( // 3 for Simulation
+        .org_clk(sys_clk),
         .sys_rst_n(sys_rst_n),
-        .E(E),
-        .F(F),
-        .G(G),
-        .A(A),
-        .B(B),
-        .C(C),
-        .D(D),
-        .locked_out(key_pad)
-    );
-
-    tone_dcdr tone_gen (
-        .sys_clk(sys_clk),
-        .sys_rst_n(sys_rst_n),
-        .key_pad(key_pad),
-        .tone_clk(tone_clk)
-    );
-
-    // unused during Simulation
-    (* keep_hierarchy = "yes" *)svn_dcdr uut2 (
-        .in(key_pad),
+        .div_n_clk(clk)
+    ); 
+    
+    svn_dcdr svn1 (
+        .in(cnt),
         .CA(CA),
         .CB(CB),
         .CC(CC),
@@ -51,9 +63,23 @@ module sound_keypad (
         .CE(CE),
         .CF(CF),
         .CG(CG),
-        .DP(DP)
+        .DP(DP),
+        .AN(AN)
     );
-    assign AN = 8'b1111_1110; // Display on the first digit
+
+    (* keep_hierarchy = "yes" *)debounce #(.N(N), .WIDTH(1)) deb1 (
+        .clk(clk),
+        .sys_rst_n(sys_rst_n),
+        .org(up),
+        .debounced(debounced_up)
+    );
+
+    (* keep_hierarchy = "yes" *)debounce #(.N(N), .WIDTH(1)) deb2 (
+        .clk(clk),
+        .sys_rst_n(sys_rst_n),
+        .org(down),
+        .debounced(debounced_down)
+    );
 
 
 endmodule
