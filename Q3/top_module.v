@@ -22,7 +22,7 @@ module top_module (
     (* mark_debug = "true", dont_touch = "true" *)reg [3:0] cnt; 
     reg debounced_up_d, debounced_down_d;
     wire up_posedge, down_posedge; 
-
+//----------------------------------posedge detector----------------------------------//
 always @(posedge sys_clk or negedge sys_rst_n) begin
     if (!sys_rst_n) begin
         debounced_up_d <= 0;
@@ -35,7 +35,9 @@ end
 
 assign up_posedge = debounced_up & ~debounced_up_d;
 assign down_posedge = debounced_down & ~debounced_down_d;
+//----------------------------------posedge detector----------------------------------//
 
+//----------------------------------4-bit counter----------------------------------//
 always @(posedge sys_clk or negedge sys_rst_n) begin
     if (!sys_rst_n) begin
         cnt <= 0;
@@ -45,6 +47,7 @@ always @(posedge sys_clk or negedge sys_rst_n) begin
         cnt <= (cnt == 0) ? 15 : cnt - 1;
     end
 end
+//----------------------------------4-bit counter----------------------------------//
 
 
     fq_div #(10000) clk_div ( // 3 for Simulation
