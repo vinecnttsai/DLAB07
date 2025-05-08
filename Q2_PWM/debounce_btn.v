@@ -1,5 +1,5 @@
 
-module debounce_bnt (
+module debounce_btn (
     input sys_clk,
     input sys_rst_n,
     input up,
