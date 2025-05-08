@@ -48,7 +48,7 @@ module sound_keypad (
         .tone_clk(tone_clk)
     );
 
-    debounce_bnt (
+    debounce_btn (
         .sys_clk(sys_clk),
         .sys_rst_n(sys_rst_n),
         .up(up),
