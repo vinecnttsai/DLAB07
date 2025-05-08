@@ -23,7 +23,7 @@ module sound_keypad (
 );
     wire [3:0] key_pad;
     wire [6:0] duty_cycle;
-    wire [6:0] cnt; // 0 ~ 10
+    wire [6:0] cnt; // 0 ~ 100
 
     assign duty_cycle = cnt;    
 
