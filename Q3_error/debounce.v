@@ -13,7 +13,7 @@ module debounce #(parameter N = 20, parameter WIDTH = 1) (
     (* mark_debug = "true", dont_touch = "true" *)reg org_reg;
     (* mark_debug = "true", dont_touch = "true" *)wire [$clog2(N + 1) - 1:0] cnt;
 
-    always @(posedge clk or sys_rst_n) begin
+    always @(posedge clk or negedge sys_rst_n) begin
         if (!sys_rst_n) begin
             org_reg <= 0;
         end else begin
